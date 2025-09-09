@@ -1,0 +1,94 @@
+Full Workflow
+Step 1: Upload the PDF
+
+You select a PDF in the frontend and click "Upload PDF".
+
+The frontend sends the file to the backend:
+POST /api/upload
+
+The backend:
+
+Saves the file in /backend/uploads/.
+
+Creates a process ID (unique identifier for this PDF).
+
+Stores the process details (name, path, createdAt) in db.json.
+
+Returns this information to the frontend.
+
+Your screen now shows the PDF viewer for this uploaded file.
+
+Step 2: View the PDF Pages
+
+The frontend uses pdf.js to render the pages (as canvases).
+
+Each page is scaled (default 1.5x) for better visibility.
+
+You can navigate using Prev / Next buttons.
+
+Step 3: Create Annotations (Field Mapping)
+
+You draw boxes over the PDF:
+
+Click → drag → release = one bounding box.
+
+Each box represents a field you want to map (e.g., Name, Barcode, Date).
+
+The system captures:
+
+Normalized coordinates: [x1, y1, x2, y2] (relative to page size).
+
+Page number.
+
+Process ID.
+
+Field name (auto-generated, can be edited later).
+
+Scale factor.
+
+Boxes show as semi-transparent overlays.
+
+Step 4: Save Annotations
+
+Click "Save annotations".
+
+Frontend sends them to:
+POST /api/pdf-annotation-mappings/bulk
+
+Backend:
+
+Validates the data.
+
+Stores them in db.json under annotations.
+
+Returns the saved records with IDs.
+
+Step 5: Reload & Persist
+
+After saving:
+
+Click "Reload annotations" or refresh the page.
+
+The frontend calls:
+GET /api/annotations/:processId
+
+Saved boxes are re-drawn on the correct pages.
+
+Step 6: (Optional) Fetch for Form Filling
+
+If you have a form (e.g., "Application Form") linked to this PDF:
+
+The system can fetch both:
+
+Field metadata (field_name, type, required, etc.)
+
+Bounding boxes
+
+Endpoint:
+POST /app_admin/api/fetch-create-table
+
+When you click a field in that form:
+
+The viewer scrolls to the corresponding PDF page.
+
+Highlights the mapped box.
